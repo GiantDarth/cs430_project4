@@ -16,9 +16,9 @@
 #define DIFFUSE_FLAG 0x1
 #define SPECULAR_FLAG 0x2
 #define NS_FLAG 0x4
-#define REFLECT_FLAG 0x8
-#define REFRACT_FLAG 0x10
-#define IOR_FLAG 0x20
+#define REFLECT_FLAG 0x100
+#define REFRACT_FLAG 0x200
+#define IOR_FLAG 0x400
 
 #define SPHERE_POS_FLAG 0x8
 #define SPHERE_RAD_FLAG 0x10
