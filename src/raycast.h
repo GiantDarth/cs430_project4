@@ -15,6 +15,9 @@ typedef struct sceneObj {
     int type;
     vector3d diffuse;
     vector3d specular;
+    float reflectivity;
+    float refractivity;
+    float ior;
     double ns;
     union {
         struct {

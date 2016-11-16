@@ -16,6 +16,9 @@
 #define DIFFUSE_FLAG 0x1
 #define SPECULAR_FLAG 0x2
 #define NS_FLAG 0x4
+#define REFLECT_FLAG 0x8
+#define REFRACT_FLAG 0x10
+#define IOR_FLAG 0x20
 
 #define SPHERE_POS_FLAG 0x8
 #define SPHERE_RAD_FLAG 0x10
@@ -262,6 +265,48 @@ jsonObj readScene(const char* path) {
 
                     obj->specular = nextColor(json, &line);
                 }
+                else if(strcmp(key, "reflectivity") == 0) {
+                    if(keyFlag & REFLECT_FLAG) {
+                        fprintf(stderr, "Error: Line %zu: 'reflectivity' already defined\n",
+                            line);
+                        exit(EXIT_FAILURE);
+                    }
+                    keyFlag |= REFLECT_FLAG;
+
+                    obj->reflectivity = nextNumber(json, &line);
+                    if(obj->reflectivity < 0.0 || obj->reflectivity > 1.0) {
+                        fprintf(stderr, "Error: Line %zu: 'reflectivity' must be"
+                            " between 0.0 and 1.0.\n",
+                            line);
+                        exit(EXIT_FAILURE);
+                    }
+                }
+                else if(strcmp(key, "refractivity") == 0) {
+                    if(keyFlag & REFRACT_FLAG) {
+                        fprintf(stderr, "Error: Line %zu: 'refractivity' already defined\n",
+                            line);
+                        exit(EXIT_FAILURE);
+                    }
+                    keyFlag |= REFRACT_FLAG;
+
+                    obj->refractivity = nextNumber(json, &line);
+                    if(obj->refractivity < 0.0 || obj->refractivity > 1.0) {
+                        fprintf(stderr, "Error: Line %zu: 'refractivity' must be"
+                            " between 0.0 and 1.0.\n",
+                            line);
+                        exit(EXIT_FAILURE);
+                    }
+                }
+                else if(strcmp(key, "ior") == 0) {
+                    if(keyFlag & IOR_FLAG) {
+                        fprintf(stderr, "Error: Line %zu: 'ior' already defined\n",
+                            line);
+                        exit(EXIT_FAILURE);
+                    }
+                    keyFlag |= IOR_FLAG;
+
+                    obj->ior = nextNumber(json, &line);
+                }
                 else {
                     fprintf(stderr, "Error: Line %zu: Key '%s' not supported "
                         "under 'sphere'\n", line, key);
@@ -308,6 +353,48 @@ jsonObj readScene(const char* path) {
                     keyFlag |= SPECULAR_FLAG;
 
                     obj->specular = nextColor(json, &line);
+                }
+                else if(strcmp(key, "reflectivity") == 0) {
+                    if(keyFlag & REFLECT_FLAG) {
+                        fprintf(stderr, "Error: Line %zu: 'reflectivity' already defined\n",
+                            line);
+                        exit(EXIT_FAILURE);
+                    }
+                    keyFlag |= REFLECT_FLAG;
+
+                    obj->reflectivity = nextNumber(json, &line);
+                    if(obj->reflectivity < 0.0 || obj->reflectivity > 1.0) {
+                        fprintf(stderr, "Error: Line %zu: 'reflectivity' must be"
+                            " between 0.0 and 1.0.\n",
+                            line);
+                        exit(EXIT_FAILURE);
+                    }
+                }
+                else if(strcmp(key, "refractivity") == 0) {
+                    if(keyFlag & REFRACT_FLAG) {
+                        fprintf(stderr, "Error: Line %zu: 'refractivity' already defined\n",
+                            line);
+                        exit(EXIT_FAILURE);
+                    }
+                    keyFlag |= REFRACT_FLAG;
+
+                    obj->refractivity = nextNumber(json, &line);
+                    if(obj->refractivity < 0.0 || obj->refractivity > 1.0) {
+                        fprintf(stderr, "Error: Line %zu: 'refractivity' must be"
+                            " between 0.0 and 1.0.\n",
+                            line);
+                        exit(EXIT_FAILURE);
+                    }
+                }
+                else if(strcmp(key, "ior") == 0) {
+                    if(keyFlag & IOR_FLAG) {
+                        fprintf(stderr, "Error: Line %zu: 'ior' already defined\n",
+                            line);
+                        exit(EXIT_FAILURE);
+                    }
+                    keyFlag |= IOR_FLAG;
+
+                    obj->ior = nextNumber(json, &line);
                 }
                 else {
                     fprintf(stderr, "Error: Line %zu: Key '%s' not supported "
