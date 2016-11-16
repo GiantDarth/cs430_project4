@@ -4,7 +4,7 @@
 
 **Northern Arizona University (Fall 2016)**
 
-raycast is a software-renderer-based raycaster that takes in an indefinite amount
+raytrace is a software-renderer-based raytracer that takes in an indefinite amount
 of scene objects such as planes and spheres provided by a JSON file, and outputs
 the scene as a P6 PPM image file.
 
