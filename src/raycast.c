@@ -4,6 +4,7 @@
 #include <string.h>
 
 #define PI 3.14159265358979323846
+#define MAX_RECURSION_LEVEL 7
 
 #include "vector3d.h"
 #include "raycast.h"
@@ -19,7 +20,10 @@ double cylinder_intersection(ray ray, sceneObj* obj);
 
 shootObj shoot(ray ray, sceneObj** objs);
 pixel shade(ray ray, vector3d intersection, sceneObj* intersected, sceneObj** objs,
-    sceneLight** lights);
+    sceneLight** lights, int level);
+
+vector3d getReflection(sceneObj* obj, vector3d pos, vector3d dir);
+vector3d getRefraction(sceneObj* obj, vector3d pos, vector3d dir);
 
 vector3d getIntersection(ray ray, double t);
 vector3d getNormal(vector3d intersection, sceneObj* obj);
@@ -58,7 +62,7 @@ void raycast(pixel* pixels, size_t width, size_t height, camera camera,
             if(closest.obj != NULL) {
                 vector3d intersection = getIntersection(ray, closest.t);
                 pixels[y * width + x] = shade(ray, intersection, closest.obj,
-                    objs, lights);
+                    objs, lights, 0);
             }
         }
     }
@@ -93,20 +97,75 @@ shootObj shoot(ray ray, sceneObj** objs) {
 }
 
 pixel shade(ray ray, vector3d intersection, sceneObj* closest, sceneObj** objs,
-        sceneLight** lights) {
+        sceneLight** lights, int level) {
+    pixel pixel = { 0 };
+
+    if(level > MAX_RECURSION_LEVEL) {
+        return pixel;
+    }
+
+    vector3d reflectVector = getReflection(closest, intersection, ray.dir);
+    vector3d refractVector = getRefraction(closest, intersection, ray.dir);
+    float directPercent = 1 - closest->reflectivity - closest->refractivity;
+    struct ray reflectRay = { 0 };
+
     vector3d sum = { 0 };
-    vector3d color;
+    vector3d color = { 0 };
+    struct pixel m_color = { 0 };
+
+    shootObj shootObj = shoot(ray, objs);
+    if(shootObj.obj != NULL) {
+        reflectRay.origin.x = intersection.x;
+        reflectRay.origin.y = intersection.y;
+        reflectRay.origin.z = intersection.z;
+
+        reflectRay.dir.x = reflectVector.x * shootObj.t;
+        reflectRay.dir.y = reflectVector.y * shootObj.t;
+        reflectRay.dir.z = reflectVector.z * shootObj.t;
+
+        m_color = shade(reflectRay, reflectVector, shootObj.obj, objs, lights,
+            level + 1);
+
+        color = vector3d_add(vector3d_scale(reflectVector, closest->reflectivity),
+            vector3d_scale(refractVector, closest->refractivity));
+        sum = vector3d_add(sum, color);
+    }
+
+
     for(size_t i = 0; lights[i] != NULL; i++) {
         if(!inShadow(intersection, lights[i], objs, closest)) {
-            color = getColor(ray, intersection, closest, lights[i]);
+            color = vector3d_scale(getColor(ray, intersection, closest, lights[i]),
+                directPercent);
             sum = vector3d_add(sum, color);
         }
     }
 
     pixel_clamp(&sum);
-    pixel pixel = vector3d2pixel(sum);
+    pixel = vector3d2pixel(sum);
 
     return pixel;
+}
+
+vector3d getReflection(sceneObj* obj, vector3d pos, vector3d dir) {
+    vector3d normal = getNormal(pos, obj);
+
+    vector3d u_m = vector3d_sub(dir, vector3d_scale(normal, 2 * vector3d_dot(dir, normal)));
+
+    return u_m;
+}
+
+vector3d getRefraction(sceneObj* obj, vector3d pos, vector3d dir) {
+    vector3d normal = getNormal(pos, obj);
+    vector3d a = vector3d_normalize(vector3d_cross(normal, dir));
+    vector3d b = vector3d_cross(a, normal);
+
+    float extIor = 1;
+    float sinPhi = (extIor / obj->ior) * vector3d_dot(dir, b);
+    float cosPhi = sqrt(1 - (sinPhi * sinPhi));
+
+    vector3d dir_t = vector3d_add(vector3d_scale(normal, -cosPhi), vector3d_scale(b, sinPhi));
+
+    return dir_t;
 }
 
 vector3d getIntersection(ray ray, double t) {
