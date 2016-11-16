@@ -9,6 +9,9 @@
         "diffuse_color": [1, 0, 0],
         "specular_color": [1, 1, 1],
         "position": [0, 1, 5],
+        "reflectivity": 0.5,
+        "refractivity": 0.2,
+        "ior": 1.1,
         "radius": 2
     },
     {
@@ -22,6 +25,9 @@
         "type": "sphere",
         "diffuse_color": [1, 0, 1],
         "position": [1, 0, 2],
+        "reflectivity": 0.1,
+        "refractivity": 0.5,
+        "ior": 1.33,
         "radius": 0.5
     },
     {
