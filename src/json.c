@@ -140,6 +140,7 @@ jsonObj readScene(const char* path) {
             obj->specular.x = 1;
             obj->specular.z = 1;
             obj->specular.y = 1;
+            obj->ior = 1;
 
             jsonObj.objs = realloc(jsonObj.objs, ++objsSize *
                 sizeof(*(jsonObj.objs)));
